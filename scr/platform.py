@@ -3,7 +3,7 @@ from game_object import GameObject
 
 
 class Platform(GameObject):
-    SPEED = 5
+    SPEED = 15
 
     def __init__(self, screen, sprite, x, y):
         super().__init__(screen, sprite, x, y)
