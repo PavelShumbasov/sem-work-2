@@ -1,5 +1,6 @@
 import pygame
 
+DEBUG = True
 
 class GameObject:
     def __init__(self, screen, sprite, x, y):
@@ -18,4 +19,6 @@ class GameObject:
         return self.x <= other_object.x + other_object.width / 2 <= self.x + self.width and \
                self.y <= other_object.y + other_object.height / 2 <= self.y + self.height
 
-
+    def update(self):   # Сигнал для определения абстрактного метода, должен быть определен в классах-наследниках
+        if DEBUG:
+            print(f"Обновление объекта {self}")
