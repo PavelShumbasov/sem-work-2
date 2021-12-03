@@ -5,7 +5,8 @@ from game_object import GameObject
 class Platform(GameObject):
     SPEED = 15
 
-    def __init__(self, screen, sprite, x, y):
+    def __init__(self, screen, sprite, x, y, is_controlled=True):
+        self.is_controlled = is_controlled
         super().__init__(screen, sprite, x, y)
 
     def move_left(self):
@@ -24,6 +25,7 @@ class Platform(GameObject):
             self.move_right()
 
     def update(self):
-        self.move()
+        if self.is_controlled:
+            self.move()
         self.draw()
 
