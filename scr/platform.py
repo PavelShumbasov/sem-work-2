@@ -16,12 +16,14 @@ class Platform(GameObject):
         if self.x + self.width < self.screen.get_width() - self.SPEED:
             self.x += self.SPEED
 
-    def move(self, key):
-        directions = {pygame.K_a: self.move_left, pygame.K_d: self.move_right}
-        move_in_direction = directions.get(key)
-        if move_in_direction:
-            move_in_direction()
+    def move(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_a]:
+            self.move_left()
+        elif keys[pygame.K_d]:
+            self.move_right()
 
     def update(self):
+        self.move()
         self.draw()
 

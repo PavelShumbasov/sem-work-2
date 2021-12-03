@@ -7,6 +7,7 @@ class GameClient:
     HEIGHT = 600
     FPS = 30
     GAME_NAME = "ARCANOID"
+    PLATFORM_SIZE = 0.1 * WIDTH, 0.1 * WIDTH * 0.2
 
     def __init__(self):
         pygame.init()
@@ -20,8 +21,8 @@ class GameClient:
                                  self.HEIGHT - self.platform1_sprite.get_height())
 
     def load_pictures(self):
-        self.platform1_sprite = pygame.image.load("images/platform1.png")
-        self.platform2_sprite = pygame.image.load("images/platform2.png")
+        self.platform1_sprite = pygame.transform.scale(pygame.image.load("images/platform1.png"), self.PLATFORM_SIZE)
+        self.platform2_sprite = pygame.transform.scale(pygame.image.load("images/platform2.png"), self.PLATFORM_SIZE)
         self.ball_sprite = pygame.image.load("images/ball.png")
 
     def main_game(self):
@@ -30,12 +31,6 @@ class GameClient:
             for event in events:
                 if event.type == pygame.QUIT:
                     exit()
-
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_a]:
-                self.platform.move_left()
-            elif keys[pygame.K_d]:
-                self.platform.move_right()
 
             self.screen.fill((0, 0, 0))
 
