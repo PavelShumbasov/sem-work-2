@@ -1,6 +1,7 @@
 import pygame
 from platform import Platform
 from ball import Ball
+from obstacle import Obstacle
 
 
 class GameClient:
@@ -21,8 +22,10 @@ class GameClient:
         self.load_pictures()
         self.platform = Platform(self.screen, self.platform1_sprite, self.WIDTH / 2,
                                  self.HEIGHT - self.platform1_sprite.get_height())
-        self.ball = Ball(self.screen, self.ball_sprite, self.WIDTH / 2, self.HEIGHT / 2, self.platform)
-        self.game_objects = [self.platform, self.ball]
+        self.obstacles = [Obstacle(self.screen, self.platform2_sprite, self.WIDTH / 2 + 40,
+                                   self.HEIGHT / 2, 2, self.platform2_sprite)]
+        self.ball = Ball(self.screen, self.ball_sprite, self.WIDTH / 2, self.HEIGHT / 2, self.platform, self.obstacles)
+        self.game_objects = [self.platform, self.ball, self.obstacles[0]]
 
     def load_pictures(self):
         self.platform1_sprite = pygame.transform.scale(pygame.image.load("images/platform1.png"), self.PLATFORM_SIZE)
