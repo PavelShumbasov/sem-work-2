@@ -1,5 +1,6 @@
 import pygame
 from platform import Platform
+from ball import Ball
 
 
 class GameClient:
@@ -8,6 +9,7 @@ class GameClient:
     FPS = 30
     GAME_NAME = "ARCANOID"
     PLATFORM_SIZE = 0.1 * WIDTH, 0.1 * WIDTH * 0.2
+    BALL_SIZE = PLATFORM_SIZE[1], PLATFORM_SIZE[1]
 
     def __init__(self):
         pygame.init()
@@ -19,11 +21,13 @@ class GameClient:
         self.load_pictures()
         self.platform = Platform(self.screen, self.platform1_sprite, self.WIDTH / 2,
                                  self.HEIGHT - self.platform1_sprite.get_height())
+        self.ball = Ball(self.screen, self.ball_sprite, self.WIDTH / 2, self.HEIGHT / 2, self.platform)
+        self.game_objects = [self.platform, self.ball]
 
     def load_pictures(self):
         self.platform1_sprite = pygame.transform.scale(pygame.image.load("images/platform1.png"), self.PLATFORM_SIZE)
         self.platform2_sprite = pygame.transform.scale(pygame.image.load("images/platform2.png"), self.PLATFORM_SIZE)
-        self.ball_sprite = pygame.image.load("images/ball.png")
+        self.ball_sprite = pygame.transform.scale(pygame.image.load("images/ball.png"), self.BALL_SIZE)
 
     def main_game(self):
         while True:
@@ -34,7 +38,8 @@ class GameClient:
 
             self.screen.fill((0, 0, 0))
 
-            self.platform.update()
+            for game_object in self.game_objects:
+                game_object.update()
 
             self.clock.tick(self.FPS)
             pygame.display.update()

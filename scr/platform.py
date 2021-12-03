@@ -10,11 +10,11 @@ class Platform(GameObject):
         super().__init__(screen, sprite, x, y)
 
     def move_left(self):
-        if self.x > self.SPEED:
+        if self.left_border >= self.SPEED:
             self.x -= self.SPEED
 
     def move_right(self):
-        if self.x + self.width < self.screen.get_width() - self.SPEED:
+        if self.right_border <= self.screen.get_width() - self.SPEED:
             self.x += self.SPEED
 
     def move(self):
