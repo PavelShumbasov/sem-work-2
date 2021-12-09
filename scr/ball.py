@@ -36,16 +36,18 @@ class Ball(GameObject):
     def check_obstacles(self):
         for obstacle in self.obstacles:
             if obstacle.is_alive:
-                if (abs(self.top_border - obstacle.bottom_border) <= self.height / 2
-                        or abs(self.bottom_border - obstacle.top_border) <= self.height / 2) \
+                if (abs(self.top_border - obstacle.bottom_border) <= self.height / 5
+                        or abs(self.bottom_border - obstacle.top_border) <= self.height / 5) \
                         and obstacle.left_border <= self.center_x <= obstacle.right_border:
                     self.reverse_vertical_direction()
+                    print('Ударился вертикально')
                     obstacle.decrease()
 
-                if (abs(self.left_border - obstacle.right_border) <= self.width / 2
-                        or abs(self.right_border - obstacle.left_border) <= self.width / 2) \
+                if (abs(self.left_border - obstacle.right_border) <= self.width / 7
+                        or abs(self.right_border - obstacle.left_border) <= self.width / 7) \
                         and obstacle.top_border <= self.center_y <= obstacle.bottom_border:
                     self.reverse_horizontal_direction()
+                    print('Ударился горизонтально')
                     obstacle.decrease()
 
     def update(self):

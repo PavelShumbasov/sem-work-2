@@ -8,8 +8,9 @@ class GameClient:
     WIDTH = 800
     HEIGHT = 600
     FPS = 30
-    GAME_NAME = "ARCANOID"
+    GAME_NAME = "ARKANOID"
     PLATFORM_SIZE = 0.1 * WIDTH, 0.1 * WIDTH * 0.2
+    OBSTACLE_SIZE = 0.1 * WIDTH, 0.1 * WIDTH * 0.4
     BALL_SIZE = PLATFORM_SIZE[1], PLATFORM_SIZE[1]
 
     def __init__(self):
@@ -22,14 +23,21 @@ class GameClient:
         self.load_pictures()
         self.platform = Platform(self.screen, self.platform1_sprite, self.WIDTH / 2,
                                  self.HEIGHT - self.platform1_sprite.get_height())
-        self.obstacles = [Obstacle(self.screen, self.platform2_sprite, self.WIDTH / 2 + 40,
-                                   self.HEIGHT / 2, 2, self.platform2_sprite)]
+        self.obstacles = [Obstacle(self.screen, self.obstacle1_sprite, self.WIDTH / 2 + 40,
+                                   self.HEIGHT / 2, 5, self.obstacle1_hitted_sprite),
+                          Obstacle(self.screen, self.obstacle1_sprite, self.WIDTH / 2 + 120,
+                                   self.HEIGHT / 2, 5, self.obstacle1_hitted_sprite),
+                          Obstacle(self.screen, self.obstacle1_sprite, self.WIDTH / 2 - 120,
+                                   self.HEIGHT / 2 + 40, 5, self.obstacle1_hitted_sprite)
+                          ]
         self.ball = Ball(self.screen, self.ball_sprite, self.WIDTH / 2, self.HEIGHT / 2, self.platform, self.obstacles)
-        self.game_objects = [self.platform, self.ball, self.obstacles[0]]
+        self.game_objects = [self.platform, self.ball, *self.obstacles]
 
     def load_pictures(self):
         self.platform1_sprite = pygame.transform.scale(pygame.image.load("images/platform1.png"), self.PLATFORM_SIZE)
         self.platform2_sprite = pygame.transform.scale(pygame.image.load("images/platform2.png"), self.PLATFORM_SIZE)
+        self.obstacle1_sprite = pygame.transform.scale(pygame.image.load("images/obstacle1.png"), self.OBSTACLE_SIZE)
+        self.obstacle1_hitted_sprite = pygame.transform.scale(pygame.image.load("images/obstacle1_hitted.png"), self.OBSTACLE_SIZE)
         self.ball_sprite = pygame.transform.scale(pygame.image.load("images/ball.png"), self.BALL_SIZE)
 
     def main_game(self):
