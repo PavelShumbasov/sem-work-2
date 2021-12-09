@@ -37,6 +37,10 @@ class GameObject:
     def center_y(self):
         return self.y + self.height / 2
 
+    @property
+    def position(self):
+        return self.x, self.y
+
     def draw(self):
         self.screen.blit(self.sprite, (self.x, self.y))
 
