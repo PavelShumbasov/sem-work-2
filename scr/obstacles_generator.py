@@ -39,7 +39,7 @@ class ObstaclesGenerator:
             if obstacle.is_alive:
                 if (abs(self.ball.top_border - obstacle.bottom_border) <= self.ball.height / 4
                     or abs(self.ball.bottom_border - obstacle.top_border) <= self.ball.height / 4) \
-                        and obstacle.left_border <= self.ball.center_x <= obstacle.right_border:
+                        and obstacle.left_border - 3 <= self.ball.center_x <= obstacle.right_border + 3:
                     self.ball.reverse_vertical_direction()
                     print('Ударился вертикально')
                     obstacle.decrease()
