@@ -41,6 +41,10 @@ class GameObject:
     def position(self):
         return self.x, self.y
 
+    @position.setter
+    def position(self, position):
+        self.x, self.y = position
+
     def draw(self):
         self.screen.blit(self.sprite, (self.x, self.y))
 

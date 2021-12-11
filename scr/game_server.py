@@ -20,12 +20,14 @@ class Server:
         self.players = []
 
     def start_game_session(self, connection, player_number):
+        while len(self.players) != player_number:
+            pass
         if player_number % 2 == 1:
             partner_numb = player_number + 1
-            welcome_message = "Вы успешно подключились! \nЖдем подключение собеседника."
+            welcome_message = "1"
         else:
             partner_numb = player_number - 1
-            welcome_message = "Вы успешно подключились! \nСобеседник ожидает вас."
+            welcome_message = "2"
 
         connection.send(str.encode(welcome_message))
 
@@ -51,3 +53,7 @@ class Server:
             self.players.append(connection)
 
             start_new_thread(self.start_game_session, (connection, len(self.players),))
+
+
+game_server = Server(HOST, PORT)
+game_server.create_game_rooms()
