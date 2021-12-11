@@ -13,7 +13,8 @@ class Obstacle(GameObject):
 
     def decrease(self):
         self.lives -= 1
-        self.sprite = self.sprite_bumped
+        if self.lives == 1:
+            self.sprite = self.sprite_bumped
 
     @property
     def is_alive(self):

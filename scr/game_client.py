@@ -13,7 +13,7 @@ class GameClient:
     PLATFORM_SIZE = 0.1 * WIDTH, 0.1 * WIDTH * 0.2
     OBSTACLE_SIZE = 0.1 * WIDTH, 0.1 * WIDTH * 0.4
     BALL_SIZE = PLATFORM_SIZE[1], PLATFORM_SIZE[1]
-    OBSTACLE_COLORS_NUM = 1
+    OBSTACLE_COLORS_NUM = 4
 
     def __init__(self):
         pygame.init()
