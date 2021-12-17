@@ -5,6 +5,7 @@ from obstacles_generator import ObstaclesGenerator
 from game_client import GameClient
 from collections import deque
 from server_message import ServerMessage
+from _thread import start_new_thread
 
 PATH = "C:/Users/79176/PycharmProjects/sem-work-2/scr/"
 
@@ -19,7 +20,7 @@ class Game:
     BALL_SIZE = PLATFORM_SIZE[1], PLATFORM_SIZE[1]
     OBSTACLE_COLORS_NUM = 4
     HOST = 'localhost'
-    PORT = 7070
+    PORT = 5050
     EVENT_PLATFORM_POSITION = "PLATFORM"
 
     def __init__(self):
@@ -47,10 +48,15 @@ class Game:
         self.ball = Ball(self.screen, self.ball_sprite, self.WIDTH / 2, self.HEIGHT / 2, self.platform)
         self.generator = ObstaclesGenerator(self.screen, self.obstacle_sprites, self.obstacle_hitted_sprites, self.ball)
         self.game_objects = [self.platform, self.platform_opp, self.ball, self.generator]
+        start_new_thread(self.get_data_from_server, ())
+
+        self.previous_position = self.platform.position
 
     def load_pictures(self):
-        self.platform1_sprite = pygame.transform.scale(pygame.image.load(PATH + "images/platform1.png"), self.PLATFORM_SIZE)
-        self.platform2_sprite = pygame.transform.scale(pygame.image.load(PATH + "images/platform2.png"), self.PLATFORM_SIZE)
+        self.platform1_sprite = pygame.transform.scale(pygame.image.load(PATH + "images/platform1.png"),
+                                                       self.PLATFORM_SIZE)
+        self.platform2_sprite = pygame.transform.scale(pygame.image.load(PATH + "images/platform2.png"),
+                                                       self.PLATFORM_SIZE)
         self.ball_sprite = pygame.transform.scale(pygame.image.load(PATH + "images/ball.png"), self.BALL_SIZE)
         self.obstacle_sprites = [
             pygame.transform.scale(pygame.image.load(PATH + f"images/obstacle{i + 1}.png"), self.OBSTACLE_SIZE)
@@ -75,11 +81,17 @@ class Game:
                 event = ServerMessage(self.messages.pop())
                 if event.type == self.EVENT_PLATFORM_POSITION:
                     self.platform_opp.position = tuple(map(float, event.data.split()))
-            self.game_client.send_data(
-                ServerMessage.prepare_data(self.EVENT_PLATFORM_POSITION, f"{self.platform.x} {self.platform.y}"))
+                    print(event.data)
+            # print(self.platform.position, self.previous_position)
             for game_object in self.game_objects:
                 game_object.update()
 
+            if self.platform.position != self.previous_position:
+                print("Движение")
+                self.game_client.send_data(
+                    ServerMessage.prepare_data(self.EVENT_PLATFORM_POSITION, f"{self.platform.x} {self.platform.y}"))
+
+            self.previous_position = self.platform.x, self.platform.y
             self.clock.tick(self.FPS)
             pygame.display.update()
 

@@ -10,14 +10,13 @@ class GameClient:
         self.client_socket.connect((host, port))
         self.player_number = self.client_socket.recv(self.DATA_SIZE).decode(self.ENCODING)
         print(self.player_number + "game client")
-        while self.player_number != "1" and self.player_number != "2":
-            self.player_number = self.client_socket.recv(self.DATA_SIZE).decode(self.ENCODING)
-            print(self.player_number + "game client")
 
     def get_data_from_server(self):
         while True:
-            server_response = self.client_socket.recv(self.DATA_SIZE)
-            yield server_response
+            server_response = self.client_socket.recv(self.DATA_SIZE).decode(self.ENCODING)
+            print("from GameClient ", server_response)
+            if "#" in server_response:
+                yield server_response
 
     def send_data(self, data):
         self.client_socket.send(data.encode(self.ENCODING))

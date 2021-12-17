@@ -1,7 +1,7 @@
 import socket
 from _thread import start_new_thread
 
-PORT = 7070
+PORT = 5050
 HOST = "localhost"
 
 
@@ -20,11 +20,11 @@ class Server:
         self.players = []
 
     def start_game_session(self, connection, player_number):
-        while len(self.players) != player_number:
-            pass
-        if player_number % 2 == 1:
+        if player_number % 2 == 0:
             partner_numb = player_number + 1
             welcome_message = "1"
+            while len(self.players) - 1 == player_number:
+                pass
         else:
             partner_numb = player_number - 1
             welcome_message = "2"
@@ -37,10 +37,7 @@ class Server:
             if not data:
                 break
 
-            if partner_numb < len(self.players):
-                self.players[partner_numb].send(data.encode(self.ENCODING))
-            else:
-                connection.send("No opponents".encode(self.ENCODING))
+            self.players[partner_numb].send(data.encode(self.ENCODING))
 
         connection.close()
 
@@ -52,7 +49,7 @@ class Server:
 
             self.players.append(connection)
 
-            start_new_thread(self.start_game_session, (connection, len(self.players),))
+            start_new_thread(self.start_game_session, (connection, len(self.players) - 1,))
 
 
 game_server = Server(HOST, PORT)
