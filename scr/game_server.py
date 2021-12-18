@@ -8,8 +8,8 @@ HOST = "localhost"
 class Server:
     CLIENTS_IN_QUEUE = 5
     MAX_PLAYERS = 300
-    DATA_SIZE = 1024
-    ENCODING = "utf-8"
+    DATA_SIZE = 2048
+    ENCODING = "ansi"
 
     def __init__(self, host, port):
         self.host = host

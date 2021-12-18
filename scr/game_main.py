@@ -6,6 +6,7 @@ from game_client import GameClient
 from collections import deque
 from server_message import ServerMessage
 from _thread import start_new_thread
+from obstacle import Obstacle
 
 PATH = "C:/Users/79176/PycharmProjects/sem-work-2/scr/"
 
@@ -13,7 +14,7 @@ PATH = "C:/Users/79176/PycharmProjects/sem-work-2/scr/"
 class Game:
     WIDTH = 800
     HEIGHT = 600
-    FPS = 30
+    FPS = 70
     GAME_NAME = "ARKANOID"
     PLATFORM_SIZE = 0.1 * WIDTH, 0.1 * WIDTH * 0.2
     OBSTACLE_SIZE = 0.1 * WIDTH, 0.1 * WIDTH * 0.4
@@ -22,6 +23,8 @@ class Game:
     HOST = 'localhost'
     PORT = 5050
     EVENT_PLATFORM_POSITION = "PLATFORM"
+    EVENT_OBSTACLE_CREATION = "OBSTACLE_CREATION"
+    EVENT_BALL_POSITION = "BALL"
 
     def __init__(self):
         self.game_client = GameClient(self.HOST, self.PORT)
@@ -40,13 +43,18 @@ class Game:
             self.platform = Platform(self.screen, self.platform1_sprite, self.WIDTH / 2,
                                      self.HEIGHT - self.platform1_sprite.get_height())
             self.platform_opp = Platform(self.screen, self.platform2_sprite, self.WIDTH / 2, 0, False)
+            is_controlled = True
         else:
             self.platform = Platform(self.screen, self.platform2_sprite, self.WIDTH / 2, 0)
             self.platform_opp = Platform(self.screen, self.platform1_sprite, self.WIDTH / 2,
                                          self.HEIGHT - self.platform1_sprite.get_height(), False)
+            is_controlled = False
 
-        self.ball = Ball(self.screen, self.ball_sprite, self.WIDTH / 2, self.HEIGHT / 2, self.platform)
-        self.generator = ObstaclesGenerator(self.screen, self.obstacle_sprites, self.obstacle_hitted_sprites, self.ball)
+        self.ball = Ball(self.screen, self.ball_sprite, self.WIDTH / 2, self.HEIGHT / 2, self.platform,
+                         self.platform_opp, is_controlled)
+        self.obstacles_que = deque()
+        self.generator = ObstaclesGenerator(self.screen, self.obstacle_sprites, self.obstacle_hitted_sprites, self.ball,
+                                            is_controlled, self.obstacles_que)
         self.game_objects = [self.platform, self.platform_opp, self.ball, self.generator]
         start_new_thread(self.get_data_from_server, ())
 
@@ -80,16 +88,32 @@ class Game:
             while len(self.messages) > 0:
                 event = ServerMessage(self.messages.pop())
                 if event.type == self.EVENT_PLATFORM_POSITION:
-                    self.platform_opp.position = tuple(map(float, event.data.split()))
-                    print(event.data)
-            # print(self.platform.position, self.previous_position)
+                    if event.data.count("&") == 1:
+                        self.platform_opp.position = tuple(map(float, event.data.split("&")))
+                elif event.type == self.EVENT_OBSTACLE_CREATION:
+                    if event.data.count("&") == 2:
+                        x, y, start_lives = event.data.split("&")
+                        self.generator.obstacles.append(
+                            Obstacle(self.screen, self.obstacle_sprites[int(start_lives) - 1], float(x), float(y),
+                                     int(start_lives), self.obstacle_hitted_sprites[int(start_lives) - 1]))
+                elif event.type == self.EVENT_BALL_POSITION:
+                    if event.data.count("&") == 1:
+                        self.ball.position = tuple(map(float, event.data.split("&")))
+
             for game_object in self.game_objects:
                 game_object.update()
-
+            print(len(self.generator.obstacles))
             if self.platform.position != self.previous_position:
-                print("Движение")
                 self.game_client.send_data(
-                    ServerMessage.prepare_data(self.EVENT_PLATFORM_POSITION, f"{self.platform.x} {self.platform.y}"))
+                    ServerMessage.prepare_data(self.EVENT_PLATFORM_POSITION, f"{self.platform.x}&{self.platform.y}"))
+            while len(self.obstacles_que) > 0:
+                obstacle = self.obstacles_que.pop()
+                self.game_client.send_data(
+                    ServerMessage.prepare_data(self.EVENT_OBSTACLE_CREATION,
+                                               f"{obstacle.x}&{obstacle.y}&{obstacle.lives}"))
+            if self.player_number == "1":
+                self.game_client.send_data(
+                    ServerMessage.prepare_data(self.EVENT_BALL_POSITION, f"{self.ball.x}&{self.ball.y}"))
 
             self.previous_position = self.platform.x, self.platform.y
             self.clock.tick(self.FPS)
