@@ -7,6 +7,7 @@ from collections import deque
 from server_message import ServerMessage
 from _thread import start_new_thread
 from obstacle import Obstacle
+from button import Button
 
 PATH = "C:/Users/79176/PycharmProjects/sem-work-2/scr/"
 
@@ -25,13 +26,9 @@ class Game:
     EVENT_PLATFORM_POSITION = "PLATFORM"
     EVENT_OBSTACLE_CREATION = "OBSTACLE_CREATION"
     EVENT_BALL_POSITION = "BALL"
+    BUTTON_SIZE = 0.4 * WIDTH, 0.2 * HEIGHT
 
     def __init__(self):
-        self.game_client = GameClient(self.HOST, self.PORT)
-        self.player_number = self.game_client.get_player_number()
-        print(self.player_number)
-        self.messages = deque()
-
         pygame.init()
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption(self.GAME_NAME)
@@ -39,6 +36,17 @@ class Game:
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont("Arial", 36)
         self.load_pictures()
+
+        self.button_start = Button(self.screen, self.button_sprites, self.WIDTH / 2 - self.BUTTON_SIZE[0] / 2,
+                                   self.HEIGHT / 2 - self.BUTTON_SIZE[1] * 1.5, "START")
+        self.button_exit = Button(self.screen, self.button_sprites, self.WIDTH / 2 - self.BUTTON_SIZE[0] / 2,
+                                  self.HEIGHT / 2 - self.BUTTON_SIZE[1] * 0.3, "EXIT")
+        self.start_menu()
+
+        self.game_client = GameClient(self.HOST, self.PORT)
+        self.player_number = self.game_client.get_player_number()
+        self.messages = deque()
+
         if self.player_number == "1":
             self.platform = Platform(self.screen, self.platform1_sprite, self.WIDTH / 2,
                                      self.HEIGHT - self.platform1_sprite.get_height())
@@ -72,10 +80,56 @@ class Game:
         self.obstacle_hitted_sprites = [
             pygame.transform.scale(pygame.image.load(PATH + f"images/obstacle{i + 1}_hitted.png"), self.OBSTACLE_SIZE)
             for i in range(self.OBSTACLE_COLORS_NUM)]
+        self.button_sprites = [
+            pygame.transform.scale(pygame.image.load(PATH + "images/button_main.png"), self.BUTTON_SIZE),
+            pygame.transform.scale(pygame.image.load(PATH + "images/button_hovered.png"), self.BUTTON_SIZE),
+            pygame.transform.scale(pygame.image.load(PATH + "images/button_clicked.png"), self.BUTTON_SIZE)]
 
     def get_data_from_server(self):
         for message in self.game_client.get_data_from_server():
             self.messages.append(message)
+
+    def start_menu(self):
+        while True:
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.QUIT:
+                    exit()
+            if self.button_exit.update():
+                exit()
+            if self.button_start.update():
+                break
+            self.clock.tick(self.FPS)
+            pygame.display.update()
+
+    def send_data_to_server(self):
+        if self.platform.position != self.previous_position:
+            self.game_client.send_data(
+                ServerMessage.prepare_data(self.EVENT_PLATFORM_POSITION, f"{self.platform.x}&{self.platform.y}"))
+        while len(self.obstacles_que) > 0:
+            obstacle = self.obstacles_que.pop()
+            self.game_client.send_data(
+                ServerMessage.prepare_data(self.EVENT_OBSTACLE_CREATION,
+                                           f"{obstacle.x}&{obstacle.y}&{obstacle.lives}"))
+        if self.player_number == "1":
+            self.game_client.send_data(
+                ServerMessage.prepare_data(self.EVENT_BALL_POSITION, f"{self.ball.x}&{self.ball.y}"))
+
+    def process_data_from_server(self):
+        while len(self.messages) > 0:
+            event = ServerMessage(self.messages.pop())
+            if event.type == self.EVENT_PLATFORM_POSITION:
+                if event.data.count("&") == 1:
+                    self.platform_opp.position = tuple(map(float, event.data.split("&")))
+            elif event.type == self.EVENT_OBSTACLE_CREATION:
+                if event.data.count("&") == 2:
+                    x, y, start_lives = event.data.split("&")
+                    self.generator.obstacles.append(
+                        Obstacle(self.screen, self.obstacle_sprites[int(start_lives) - 1], float(x), float(y),
+                                 int(start_lives), self.obstacle_hitted_sprites[int(start_lives) - 1]))
+            elif event.type == self.EVENT_BALL_POSITION:
+                if event.data.count("&") == 1:
+                    self.ball.position = tuple(map(float, event.data.split("&")))
 
     def main_game(self):
         while True:
@@ -85,35 +139,13 @@ class Game:
                     exit()
 
             self.screen.fill((0, 0, 0))
-            while len(self.messages) > 0:
-                event = ServerMessage(self.messages.pop())
-                if event.type == self.EVENT_PLATFORM_POSITION:
-                    if event.data.count("&") == 1:
-                        self.platform_opp.position = tuple(map(float, event.data.split("&")))
-                elif event.type == self.EVENT_OBSTACLE_CREATION:
-                    if event.data.count("&") == 2:
-                        x, y, start_lives = event.data.split("&")
-                        self.generator.obstacles.append(
-                            Obstacle(self.screen, self.obstacle_sprites[int(start_lives) - 1], float(x), float(y),
-                                     int(start_lives), self.obstacle_hitted_sprites[int(start_lives) - 1]))
-                elif event.type == self.EVENT_BALL_POSITION:
-                    if event.data.count("&") == 1:
-                        self.ball.position = tuple(map(float, event.data.split("&")))
+
+            self.process_data_from_server()
 
             for game_object in self.game_objects:
                 game_object.update()
-            print(len(self.generator.obstacles))
-            if self.platform.position != self.previous_position:
-                self.game_client.send_data(
-                    ServerMessage.prepare_data(self.EVENT_PLATFORM_POSITION, f"{self.platform.x}&{self.platform.y}"))
-            while len(self.obstacles_que) > 0:
-                obstacle = self.obstacles_que.pop()
-                self.game_client.send_data(
-                    ServerMessage.prepare_data(self.EVENT_OBSTACLE_CREATION,
-                                               f"{obstacle.x}&{obstacle.y}&{obstacle.lives}"))
-            if self.player_number == "1":
-                self.game_client.send_data(
-                    ServerMessage.prepare_data(self.EVENT_BALL_POSITION, f"{self.ball.x}&{self.ball.y}"))
+
+            self.send_data_to_server()
 
             self.previous_position = self.platform.x, self.platform.y
             self.clock.tick(self.FPS)
