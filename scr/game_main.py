@@ -27,9 +27,14 @@ class Game:
     EVENT_OBSTACLE_CREATION = "OBSTACLE_CREATION"
     EVENT_BALL_POSITION = "BALL"
     BUTTON_SIZE = 0.4 * WIDTH, 0.2 * HEIGHT
+    FONT_SIZE = 30
+    WAIT_OPP = "Ожидание второго игрока..."
 
     def __init__(self):
         pygame.init()
+        self.font = pygame.font.SysFont("Arial", self.FONT_SIZE)
+        self.wait_opp_text = self.font.render(self.WAIT_OPP, True, (255, 255, 255))
+
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption(self.GAME_NAME)
 
@@ -43,8 +48,11 @@ class Game:
                                   self.HEIGHT / 2 - self.BUTTON_SIZE[1] * 0.3, "EXIT")
         self.start_menu()
 
-        self.game_client = GameClient(self.HOST, self.PORT)
-        self.player_number = self.game_client.get_player_number()
+        self.game_client = None
+        self.player_number = None
+        start_new_thread(self.get_player_number, ())
+        print("Запуск сцены ожидания")
+        self.waiting_room()
         self.messages = deque()
 
         if self.player_number == "1":
@@ -88,6 +96,22 @@ class Game:
     def get_data_from_server(self):
         for message in self.game_client.get_data_from_server():
             self.messages.append(message)
+
+    def get_player_number(self):
+        self.game_client = GameClient(self.HOST, self.PORT)
+        self.player_number = self.game_client.get_player_number()
+
+    def waiting_room(self):
+        while not self.player_number:
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.QUIT:
+                    exit()
+            self.screen.fill((0, 0, 0))
+            self.screen.blit(self.wait_opp_text, ((self.WIDTH - self.wait_opp_text.get_width()) / 2,
+                                                  (self.HEIGHT - self.wait_opp_text.get_height()) / 2))
+            self.clock.tick(self.FPS)
+            pygame.display.update()
 
     def start_menu(self):
         while True:
