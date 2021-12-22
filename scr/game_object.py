@@ -12,6 +12,7 @@ class GameObject:
 
         self.width = sprite.get_width()
         self.height = sprite.get_height()
+        self.collider = pygame.Rect(self.x, self.y, self.width, self.height)
 
     @property
     def right_border(self):
@@ -46,11 +47,12 @@ class GameObject:
         self.x, self.y = position
 
     def draw(self):
+        self.collider.x = self.x
+        self.collider.y = self.y
         self.screen.blit(self.sprite, (self.x, self.y))
 
     def check_collision(self, other_object):
-        return self.left_border <= other_object.center_x <= self.right_border and \
-               self.top_border <= other_object.center_y <= self.bottom_border
+        return self.collider.colliderect(other_object.collider)
 
     def update(self):  # Сигнал для определения абстрактного метода, должен быть определен в классах-наследниках
         if DEBUG:

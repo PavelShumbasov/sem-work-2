@@ -43,20 +43,26 @@ class ObstaclesGenerator:
     def check_obstacles(self):
         for obstacle in self.obstacles[::-1]:
             if obstacle.is_alive:
-                if (abs(self.ball.top_border - obstacle.bottom_border) <= self.ball.height / 1.5
-                    or abs(self.ball.bottom_border - obstacle.top_border) <= self.ball.height / 1.5) \
-                        and obstacle.left_border <= self.ball.center_x <= obstacle.right_border:
-                    self.ball.reverse_vertical_direction()
-                    print('Ударился вертикально')
-                    obstacle.decrease()
+                if obstacle.check_collision(self.ball):
+                    if self.ball.dx > 0:
+                        delta_x = self.ball.right_border - obstacle.left_border
+                    else:
+                        delta_x = obstacle.right_border - self.ball.left_border
+                    if self.ball.dy > 0:
+                        delta_y = self.ball.bottom_border - obstacle.top_border
+                    else:
+                        delta_y = obstacle.bottom_border - self.ball.top_border
 
-                elif (abs(self.ball.left_border - obstacle.right_border) <= self.ball.width / 3
-                      or abs(self.ball.right_border - obstacle.left_border) <= self.ball.width / 3) \
-                        and obstacle.top_border <= self.ball.center_y <= obstacle.bottom_border:
-                    self.ball.reverse_horizontal_direction()
-                    print('Ударился горизонтально')
-                    obstacle.decrease()
-
+                    if abs(delta_x - delta_y) < 4:
+                        self.ball.reverse_horizontal_direction()
+                        self.ball.reverse_vertical_direction()
+                        obstacle.decrease()
+                    elif delta_x > delta_y:
+                        self.ball.reverse_vertical_direction()
+                        obstacle.decrease()
+                    elif delta_y > delta_x:
+                        self.ball.reverse_horizontal_direction()
+                        obstacle.decrease()
                 obstacle.update()
             else:
                 self.obstacles.remove(obstacle)

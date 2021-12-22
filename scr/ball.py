@@ -4,7 +4,6 @@ from game_object import GameObject
 
 class Ball(GameObject):
     SPEED = 6
-    DELAY = 4
 
     def __init__(self, screen, sprite, x, y, platform, platform_opp, is_controlled):
         super().__init__(screen, sprite, x, y)
@@ -16,15 +15,16 @@ class Ball(GameObject):
         self.is_controlled = is_controlled
 
     def check_borders(self):
-        if (self.platform.check_collision(self) or self.platform_opp.check_collision(self)) and self.timer > self.DELAY:
+        if self.platform.check_collision(self) and self.dy > 0 \
+                or self.platform_opp.check_collision(self) and self.dy < 0:
             self.reverse_vertical_direction()
             print("СТОЛКНОВЕНИЕ!!!")
 
-        if (self.bottom_border >= self.screen.get_height() or self.top_border <= 0) and self.timer > self.DELAY:
+        if self.bottom_border >= self.screen.get_height() and self.dy > 0 or self.top_border <= 0 and self.dy < 0:
             self.reverse_vertical_direction()
             print("Проигрыш")
 
-        if (self.left_border <= 0 or self.right_border >= self.screen.get_width() - 2) and self.timer > self.DELAY:
+        if self.left_border <= 0 and self.dx < 0 or self.right_border >= self.screen.get_width() and self.dx > 0:
             self.reverse_horizontal_direction()
 
         self.x += self.dx
