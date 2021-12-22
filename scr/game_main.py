@@ -8,6 +8,7 @@ from server_message import ServerMessage
 from _thread import start_new_thread
 from obstacle import Obstacle
 from button import Button
+from life_holder import LifeHolder
 
 PATH = "C:/Users/79176/PycharmProjects/sem-work-2/scr/"
 
@@ -51,7 +52,6 @@ class Game:
         self.game_client = None
         self.player_number = None
         start_new_thread(self.get_player_number, ())
-        print("Запуск сцены ожидания")
         self.waiting_room()
         self.messages = deque()
 
@@ -60,18 +60,23 @@ class Game:
                                      self.HEIGHT - self.platform1_sprite.get_height())
             self.platform_opp = Platform(self.screen, self.platform2_sprite, self.WIDTH / 2, 0, False)
             is_controlled = True
+
         else:
             self.platform = Platform(self.screen, self.platform2_sprite, self.WIDTH / 2, 0)
             self.platform_opp = Platform(self.screen, self.platform1_sprite, self.WIDTH / 2,
                                          self.HEIGHT - self.platform1_sprite.get_height(), False)
             is_controlled = False
 
+        self.life_holder_bottom = LifeHolder(self.screen, self.WIDTH - 40, self.HEIGHT - 40, 5)
+        self.life_holder_top = LifeHolder(self.screen, self.WIDTH - 40, 0, 5)
+
         self.ball = Ball(self.screen, self.ball_sprite, self.WIDTH / 2, self.HEIGHT / 2, self.platform,
                          self.platform_opp, is_controlled)
         self.obstacles_que = deque()
         self.generator = ObstaclesGenerator(self.screen, self.obstacle_sprites, self.obstacle_hitted_sprites, self.ball,
                                             is_controlled, self.obstacles_que)
-        self.game_objects = [self.platform, self.platform_opp, self.ball, self.generator]
+        self.game_objects = [self.platform, self.platform_opp, self.ball, self.generator, self.life_holder_bottom,
+                             self.life_holder_top]
         start_new_thread(self.get_data_from_server, ())
 
         self.previous_position = self.platform.position
@@ -112,6 +117,18 @@ class Game:
                                                   (self.HEIGHT - self.wait_opp_text.get_height()) / 2))
             self.clock.tick(self.FPS)
             pygame.display.update()
+
+    def check_collision(self):
+        check_end = False
+        if self.ball.bottom_border >= self.screen.get_height() and self.ball.dy > 0:
+            check_end = self.life_holder_bottom.decrease()
+            print("Нижняя стенка")
+        elif self.ball.top_border <= 0 and self.ball.dy < 0:
+            check_end = self.life_holder_top.decrease()
+            print("Верхняя стенка")
+
+        if check_end:
+            print("Конец игры")
 
     def start_menu(self):
         while True:
@@ -165,6 +182,8 @@ class Game:
             self.screen.fill((0, 0, 0))
 
             self.process_data_from_server()
+
+            self.check_collision()
 
             for game_object in self.game_objects:
                 game_object.update()

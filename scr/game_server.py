@@ -24,7 +24,7 @@ class Server:
             partner_numb = player_number + 1
             welcome_message = "1"
             while len(self.players) - 1 == player_number:
-                pass
+                continue
         else:
             partner_numb = player_number - 1
             welcome_message = "2"

@@ -5,6 +5,7 @@ from random import randint
 
 class ObstaclesGenerator:
     SPEED = 90
+    MAX_AMOUNT = 15
 
     def __init__(self, screen, obstacle_sprites, obstacle_hitted_sprites, ball, is_controlled, obstacles_que):
         self.screen = screen
@@ -24,6 +25,8 @@ class ObstaclesGenerator:
         return x, y
 
     def __generate(self):
+        if len(self.obstacles) > self.MAX_AMOUNT:
+            return
         x, y = self.generate_position()
         while len(list(filter(lambda obs: obs.position == (x, y), self.obstacles))) > 0 \
                 and not x <= self.ball.x <= x + self.obstacle_sprites[0].get_width() \
