@@ -33,9 +33,10 @@ class ObstaclesGenerator:
                 and not y <= self.ball.y <= y + self.obstacle_sprites[0].get_height():
             x, y = self.generate_position()
         color_num = randint(0, len(self.obstacle_sprites) - 1)
-        self.obstacles.append(Obstacle(self.screen, self.obstacle_sprites[color_num], x, y, color_num + 1,
-                                       self.obstacle_hitted_sprites[color_num]))
-        self.obstacles_que.append(self.obstacles[-1])
+        obstacle = Obstacle(self.screen, self.obstacle_sprites[color_num], x, y, color_num + 1,
+                            self.obstacle_hitted_sprites[color_num])
+        self.obstacles.append(obstacle)
+        self.obstacles_que.append(f"{obstacle.x}&{obstacle.y}&{obstacle.lives}")
 
     def generate(self):
         self.timer += 1

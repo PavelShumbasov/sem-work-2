@@ -9,4 +9,4 @@ class ServerMessage:
 
     @staticmethod
     def prepare_data(type_, data):
-        return type_ + ServerMessage.SEPARATOR + data
+        return type_ + ServerMessage.SEPARATOR + data + " "
