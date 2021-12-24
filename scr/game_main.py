@@ -75,7 +75,7 @@ class Game:
                                              self.HEIGHT - self.platform1_sprite.get_height(), False)
                 is_controlled = False
 
-            self.life_holder_bottom = LifeHolder(self.screen, self.WIDTH - 40, self.HEIGHT - 40, self.AMOUNT_OF_LIFE)
+            self.life_holder_bottom = LifeHolder(self.screen, self.WIDTH - 40, self.HEIGHT - 60, self.AMOUNT_OF_LIFE)
             self.life_holder_top = LifeHolder(self.screen, self.WIDTH - 40, 0, self.AMOUNT_OF_LIFE)
 
             self.ball = Ball(self.screen, self.ball_sprite, self.WIDTH / 2, self.HEIGHT / 2, self.platform,
@@ -159,14 +159,15 @@ class Game:
             pygame.display.update()
 
     def send_data_to_server(self):
+        while len(self.obstacles_que) > 0:
+            obstacle = self.obstacles_que.pop()
+            self.game_client.send_data(
+                ServerMessage.prepare_data(self.EVENT_OBSTACLE_CREATION, obstacle))
+
         if self.platform.position != self.previous_position:
             self.game_client.send_data(
                 ServerMessage.prepare_data(self.EVENT_PLATFORM_POSITION, f"{self.platform.x}&{self.platform.y}"))
-        while len(self.obstacles_que) > 0:
-            obstacle = self.obstacles_que.pop()
-            print("Отправка платформы")
-            self.game_client.send_data(
-                ServerMessage.prepare_data(self.EVENT_OBSTACLE_CREATION, obstacle))
+
         if self.player_number == "1":
             self.game_client.send_data(
                 ServerMessage.prepare_data(self.EVENT_BALL_POSITION, f"{self.ball.x}&{self.ball.y}"))
@@ -183,7 +184,6 @@ class Game:
                 if event.data.count("&") == 1:
                     self.platform_opp.position = tuple(map(float, event.data.split("&")))
             elif event.type == self.EVENT_OBSTACLE_CREATION:
-                print("Создание платформы")
                 if event.data.count("&") == 2:
                     x, y, start_lives = event.data.split("&")
                     self.generator.obstacles.append(

@@ -18,10 +18,10 @@ class ObstaclesGenerator:
         self.obstacles_que = obstacles_que
 
     def generate_position(self):
-        x = randint(0, self.screen.get_width() // self.obstacle_sprites[0].get_width()) * self.obstacle_sprites[
-            0].get_width()
-        y = randint(3, self.screen.get_height() // self.obstacle_sprites[0].get_height() - 3) * self.obstacle_sprites[
-            0].get_height()
+        x = randint(0, self.screen.get_width() // self.obstacle_sprites[0].get_width()) \
+            * self.obstacle_sprites[0].get_width()
+        y = randint(3, self.screen.get_height() // self.obstacle_sprites[0].get_height() - 3) \
+            * self.obstacle_sprites[0].get_height()
         return x, y
 
     def __generate(self):
