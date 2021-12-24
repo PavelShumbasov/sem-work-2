@@ -1,4 +1,3 @@
-import pygame
 from obstacle import Obstacle
 from random import randint
 
@@ -20,7 +19,7 @@ class ObstaclesGenerator:
     def generate_position(self):
         x = randint(0, self.screen.get_width() // self.obstacle_sprites[0].get_width()) \
             * self.obstacle_sprites[0].get_width()
-        y = randint(3, self.screen.get_height() // self.obstacle_sprites[0].get_height() - 3) \
+        y = randint(4, self.screen.get_height() // self.obstacle_sprites[0].get_height() - 4) \
             * self.obstacle_sprites[0].get_height()
         return x, y
 

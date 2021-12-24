@@ -10,12 +10,13 @@ from obstacle import Obstacle
 from button import Button
 from life_holder import LifeHolder
 
+# УКАЗАТЬ КОРРЕКТНЫЙ ПУТЬ К РЕСУРСАМ
 PATH = "C:/Users/79176/PycharmProjects/sem-work-2/scr/"
 
 
 class Game:
-    WIDTH = 800
-    HEIGHT = 600
+    WIDTH = 700
+    HEIGHT = 500
     FPS = 30
     GAME_NAME = "ARKANOID"
     PLATFORM_SIZE = 0.1 * WIDTH, 0.1 * WIDTH * 0.2
@@ -44,7 +45,6 @@ class Game:
         pygame.display.set_caption(self.GAME_NAME)
 
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont("Arial", 36)
         self.load_pictures()
 
         self.button_start = Button(self.screen, self.button_sprites, self.WIDTH / 2 - self.BUTTON_SIZE[0] / 2,
@@ -75,8 +75,8 @@ class Game:
                                              self.HEIGHT - self.platform1_sprite.get_height(), False)
                 is_controlled = False
 
-            self.life_holder_bottom = LifeHolder(self.screen, self.WIDTH - 40, self.HEIGHT - 60, self.AMOUNT_OF_LIFE)
-            self.life_holder_top = LifeHolder(self.screen, self.WIDTH - 40, 0, self.AMOUNT_OF_LIFE)
+            self.life_holder_bottom = LifeHolder(self.screen, self.WIDTH - 40, self.HEIGHT - 40, self.AMOUNT_OF_LIFE)
+            self.life_holder_top = LifeHolder(self.screen, self.WIDTH - 40, 20, self.AMOUNT_OF_LIFE)
 
             self.ball = Ball(self.screen, self.ball_sprite, self.WIDTH / 2, self.HEIGHT / 2, self.platform,
                              self.platform_opp, is_controlled)
@@ -161,8 +161,7 @@ class Game:
     def send_data_to_server(self):
         while len(self.obstacles_que) > 0:
             obstacle = self.obstacles_que.pop()
-            self.game_client.send_data(
-                ServerMessage.prepare_data(self.EVENT_OBSTACLE_CREATION, obstacle))
+            self.game_client.send_data(ServerMessage.prepare_data(self.EVENT_OBSTACLE_CREATION, obstacle))
 
         if self.platform.position != self.previous_position:
             self.game_client.send_data(

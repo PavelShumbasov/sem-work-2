@@ -19,9 +19,9 @@ class Platform(GameObject):
 
     def move(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
+        if keys[pygame.K_LEFT]:
             self.move_left()
-        elif keys[pygame.K_d]:
+        elif keys[pygame.K_RIGHT]:
             self.move_right()
 
     def update(self):
